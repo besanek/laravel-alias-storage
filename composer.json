@@ -1,0 +1,40 @@
+{
+    "name": "besanek/laravel-alias-storage",
+    "description": "",
+    "type": "library",
+    "license": ["BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
+    "keywords": ["filesystem", "laravel", "alias", "lumen", "l5"],
+    "require": {
+        "illuminate/filesystem": "^5.5",
+        "illuminate/support": "^5.5",
+        "php": "^7.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^3.8",
+        "phpunit/phpunit": "^7.0",
+        "mockery/mockery": "~1.0"
+    },
+    "authors": [
+        {
+            "name": "Robert Jelen",
+            "email": "robert@jelen.dev"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Besanek\\LaravelAliasStorage\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Besanek\\LaravelAliasStorage\\AliasStorageProvider"
+            ]
+        }
+    }
+}
