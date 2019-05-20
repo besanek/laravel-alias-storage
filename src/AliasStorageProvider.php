@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Besanek\LaravelAliasStorage;
 
+use Besanek\LaravelAliasStorage\Exceptions\InvalidConfigurationException;
 use Closure;
 use DomainException;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -13,6 +14,9 @@ use Illuminate\Support\ServiceProvider;
 
 class AliasStorageProvider extends ServiceProvider
 {
+    /** @var string[] */
+    private $targetStack = [];
+
     public function boot(): void
     {
         $filesystemManager = $this->getFilesystemManager();
@@ -20,12 +24,24 @@ class AliasStorageProvider extends ServiceProvider
         $filesystemManager->extend('alias', Closure::fromCallable([$this, 'extend']));
     }
 
+    /**
+     * @param Application $app
+     * @param array $config
+     * @return Filesystem
+     */
     public function extend(Application $app, array $config): Filesystem
     {
         $filesystemManager = $this->getFilesystemManager();
 
+        $target = $this->getTargetFromConfig($config);
+
+        $this->targetStack[] = $target;
+
         /** @var Filesystem $disk */
-        $disk = $filesystemManager->disk($config['target']);
+        $disk = $filesystemManager->disk($target);
+
+        array_pop($this->targetStack);
+
         return $disk;
     }
 
@@ -49,5 +65,26 @@ class AliasStorageProvider extends ServiceProvider
         }
 
         return $filesystem;
+    }
+
+    /**
+     * @param array $config
+     * @return mixed
+     */
+    private function getTargetFromConfig(array $config)
+    {
+        if (!isset($config['target'])) {
+            throw new InvalidConfigurationException(
+                'Missing target in configuration'
+            );
+        }
+
+        $target = $config['target'];
+        if (in_array($target, $this->targetStack, true)) {
+            throw new InvalidConfigurationException(
+                'Found cyclic disk aliasing: ' . implode(' > ', $this->targetStack)
+            );
+        }
+        return $target;
     }
 }

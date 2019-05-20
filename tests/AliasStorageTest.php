@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Besanek\LaravelAliasStorage\Tests;
 
+use Besanek\LaravelAliasStorage\Exceptions\InvalidConfigurationException;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Storage;
 
@@ -34,7 +35,7 @@ class AliasStorageTest extends TestCase
     /**
      * @throws FileNotFoundException
      */
-    public function testAlias()
+    public function testAlias(): void
     {
         $diskLocal = Storage::disk('local');
         $diskFoo = Storage::disk('foo');
@@ -51,5 +52,26 @@ class AliasStorageTest extends TestCase
         $diskBar->put('something', $random);
         $this->assertSame($random, $diskLocal->get('something'));
         $this->assertSame($random, $diskFoo->get('something'));
+    }
+
+    public function testMissingTarget(): void
+    {
+        $this->app['config']->set('filesystems.disks.alone', [
+            'driver' => 'alias',
+        ]);
+
+        $this->expectException(InvalidConfigurationException::class);
+
+        Storage::disk('alone');
+    }
+
+    public function testCyclic(): void
+    {
+        $this->app['config']->set('filesystems.disks.foo.target', 'bar');
+        $this->app['config']->set('filesystems.disks.bar.target', 'foo');
+
+        $this->expectException(InvalidConfigurationException::class);
+
+        Storage::disk('bar');
     }
 }
