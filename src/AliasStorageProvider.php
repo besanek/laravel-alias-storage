@@ -14,8 +14,8 @@ use Illuminate\Support\ServiceProvider;
 
 class AliasStorageProvider extends ServiceProvider
 {
-    /** @var string[] */
-    private $targetStack = [];
+    /** @var array<int,string> */
+    private array $targetStack = [];
 
     public function boot(): void
     {
@@ -37,17 +37,16 @@ class AliasStorageProvider extends ServiceProvider
 
         $this->targetStack[] = $target;
 
-        /** @var Filesystem $disk */
-        $disk = $filesystemManager->disk($target);
+        /** @var FilesystemFactory $factory */
+        $factory = $this->app->make(FilesystemFactory::class);
+
+        $disk = $factory->make($filesystemManager, $target, $config['options'] ?? []);
 
         array_pop($this->targetStack);
 
         return $disk;
     }
 
-    /**
-     * @return FilesystemManager
-     */
     private function getFilesystemManager(): FilesystemManager
     {
         $filesystem = null;
@@ -68,8 +67,8 @@ class AliasStorageProvider extends ServiceProvider
     }
 
     /**
-     * @param array $config
-     * @return mixed
+     * @param array<string,mixed> $config
+     * @return string
      */
     private function getTargetFromConfig(array $config)
     {

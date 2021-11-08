@@ -54,6 +54,24 @@ class AliasStorageTest extends TestCase
         $this->assertSame($random, $diskFoo->get('something'));
     }
 
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testAliasWithOptions(): void
+    {
+        $this->app['config']->set('filesystems.disks.foo.options', [
+            'root' => storage_path('app/public/inner'),
+        ]);
+
+        $diskLocal = Storage::disk('local');
+        $diskFoo = Storage::disk('foo');
+
+        $random = uniqid('', true);
+
+        $diskFoo->put('something', $random);
+        $this->assertSame($random, $diskLocal->get('inner/something'));
+    }
+
     public function testMissingTarget(): void
     {
         $this->app['config']->set('filesystems.disks.alone', [
