@@ -4,8 +4,8 @@ Meta filesystem, witch you can acreate aliases for other filesystems.
 
 ## Requirement
 
--   PHP >= 7.1
--   Laravel >= 5.5
+-   PHP >= 7.4
+-   Laravel >= 8.x
 
 ## Installing
 
