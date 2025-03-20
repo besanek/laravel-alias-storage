@@ -15,8 +15,8 @@
         "l5"
     ],
     "require": {
-        "illuminate/filesystem": "^10.0|^11.0",
-        "illuminate/support": "^10.0|^11.0",
+        "illuminate/filesystem": "^10.0|^11.0|^12.0",
+        "illuminate/support": "^10.0|^11.0|^12.0",
         "php": "^8.1"
     },
     "require-dev": {
