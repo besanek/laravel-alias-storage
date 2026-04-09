@@ -24,10 +24,10 @@ class FilesystemFactory extends FilesystemManager
 
         $repository->set($key, array_merge($backupConfig, $config));
 
-        $fileSystem = $manager->resolve($target);
-
-        $repository->set($key, $backupConfig);
-
-        return $fileSystem;
+        try {
+            return $manager->resolve($target);
+        } finally {
+            $repository->set($key, $backupConfig);
+        }
     }
 }
