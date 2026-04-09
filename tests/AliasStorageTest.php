@@ -92,4 +92,40 @@ class AliasStorageTest extends TestCase
 
         Storage::disk('bar');
     }
+
+    /**
+     * @see https://github.com/besanek/laravel-alias-storage/issues/5
+     */
+    public function testTargetStackIsCleanedUpAfterException(): void
+    {
+        $this->app['config']->set('filesystems.disks.broken', [
+            'driver' => 'alias',
+            'target' => 'nonexistent_driver_disk',
+        ]);
+
+        $this->app['config']->set('filesystems.disks.nonexistent_driver_disk', [
+            'driver' => 'this_driver_does_not_exist',
+        ]);
+
+        try {
+            Storage::disk('broken');
+            $this->fail('Expected an exception from the invalid driver');
+        } catch (\InvalidArgumentException) {
+            // expected
+        }
+
+        $this->app['config']->set('filesystems.disks.nonexistent_driver_disk', [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+        ]);
+
+        $this->app['config']->set('filesystems.disks.another_alias', [
+            'driver' => 'alias',
+            'target' => 'nonexistent_driver_disk',
+        ]);
+
+        // Without fix: false "cyclic disk aliasing" detection
+        $disk = Storage::disk('another_alias');
+        $this->assertNotNull($disk);
+    }
 }

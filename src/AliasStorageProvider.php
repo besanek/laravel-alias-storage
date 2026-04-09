@@ -39,14 +39,14 @@ class AliasStorageProvider extends ServiceProvider
 
         $this->targetStack[] = $target;
 
-        /** @var FilesystemFactory $factory */
-        $factory = $this->app->make(FilesystemFactory::class);
+        try {
+            /** @var FilesystemFactory $factory */
+            $factory = $this->app->make(FilesystemFactory::class);
 
-        $disk = $factory->make($filesystemManager, $target, $config['options'] ?? []);
-
-        array_pop($this->targetStack);
-
-        return $disk;
+            return $factory->make($filesystemManager, $target, $config['options'] ?? []);
+        } finally {
+            array_pop($this->targetStack);
+        }
     }
 
     private function getFilesystemManager(): FilesystemManager
